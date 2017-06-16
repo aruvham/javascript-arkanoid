@@ -1,0 +1,11 @@
+{
+  "name": "javascript-arkanoid",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aruvham/javascript-arkanoid.git"
+  },
+  "author": "Arturo Ruvalcaba",
+  "license": "ISC"
+}

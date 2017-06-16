@@ -1,43 +1,33 @@
-// Arkanoid by arturham
+// Arkanoid by aruvham
 // 9 Dic 2016
 
 //-------------------------------------------------------------------------
 // game constants
 //-------------------------------------------------------------------------
-
-var w    = 546,    // canvas width
-    h    = 434,    // canvas height
-    cols = 11,
-    rows = 30,
-    cw   = 336,    // court width
-    ch   = 420,    // court height
-    wall = 14,     // walls width
-    pt   = 14,     // padding top
-    pr   = 168,    // padding right
-    pl   = 42,     // padding left
-    pw   = 56,     // paddle width
-    ph   = 14,     // paddle height
-    bw   = 28,     // brick width
-    bh   = 14,     // brick height
-    br   = 5,      // ball radius
-
-    KEY  = { A: 65, D: 68, Q: 81, R: 82, S: 83, W: 87 },
-
-    maxSpeed = 10; // pixels per frame
-
-
+                   // pt => hit
+var WIDTH   = 546, //w h pt pr pl wt wr wl cw ch pw ph bw bh br cols rows
+    HEIGHT  = 434,
+    PADDING = { t:  14, r: 168, l: 42 },
+    WALL    = { t:  14, r:  14, l: 14 },
+    COURT   = { w: 336, h: 420 },
+    PADDLE  = { w:  56, h:  14 },
+    BRICK   = { w:  28, h:  14 },
+    BR      =   5,
+    COLS    =  11,
+    ROWS    =  30,
+    KEY     = { A: 65, D: 68, Q: 81, R: 82, S: 83, W: 87 };
 
 //-------------------------------------------------------------------------
 // game variables
 //-------------------------------------------------------------------------
 
-var game,       // game obj
-    paddle,     // paddle obj
-    balls,      // array for balls
-    bricks,     // array for bricks
-    powerUps,   // array for p ups
-    lasers,     // array for lasers
-    highScore,
+var game,
+    paddle,
+    balls,
+    bricks,
+    powerUps,
+    lasers,
+    highScore = 25000,
     score,
     lives,
     level,
@@ -50,6 +40,7 @@ var game,       // game obj
 var menu,
     paused,
     stopped;
+    //AI = true;
 
 //-------------------------------------------------------------------------
 // preload
@@ -84,20 +75,13 @@ function preload() {
 
   // sounds
   S_Destroy     = loadSound("assets/S_Destroy.wav");
-  S_Expand      = loadSound("assets/S_Expand.wav");
-  S_Expand.playMode("restart");
-  S_Extra       = loadSound("assets/S_Extra.wav");
-  S_Extra.playMode("restart");
-  S_Explosion_01= loadSound("assets/S_Explosion_01.wav");
-  S_Explosion_01.playMode("restart");
-  S_Hit_01      = loadSound("assets/S_Hit_01.wav");
-  S_Hit_01.playMode("restart"); // paddle
-  S_Hit_02      = loadSound("assets/S_Hit_02.wav");
-  S_Hit_02.playMode("restart"); // brick
-  S_Hit_03      = loadSound("assets/S_Hit_03.wav");
-  S_Hit_03.playMode("restart"); // metal
-  S_Hit_04      = loadSound("assets/S_Hit_04.wav");
-  S_Hit_04.playMode("restart"); // magnet
+  S_Expand      = loadSound("assets/S_Expand.wav"); S_Expand.playMode("restart");
+  S_Extra       = loadSound("assets/S_Extra.wav");  S_Extra.playMode("restart");
+  S_Explosion_01= loadSound("assets/S_Explosion_01.wav");  S_Explosion_01.playMode("restart");
+  S_Hit_01      = loadSound("assets/S_Hit_01.wav"); S_Hit_01.playMode("restart"); // paddle
+  S_Hit_02      = loadSound("assets/S_Hit_02.wav"); S_Hit_02.playMode("restart"); // brick
+  S_Hit_03      = loadSound("assets/S_Hit_03.wav"); S_Hit_03.playMode("restart"); // metal
+  S_Hit_04      = loadSound("assets/S_Hit_04.wav"); S_Hit_04.playMode("restart"); // magnet
   S_Laser       = loadSound("assets/S_Laser.wav");
   S_Start_01    = loadSound("assets/S_Start_01.wav"); // init
   S_Start_02    = loadSound("assets/S_Start_02.wav"); // loadLevel
@@ -108,9 +92,8 @@ function preload() {
 //-------------------------------------------------------------------------
 
 function setup() {
-  createCanvas(w, h);
+  createCanvas(WIDTH, HEIGHT);
   game = new Game();
-  highScore = 25000;
   game.init();
 }
 
@@ -119,6 +102,7 @@ function setup() {
 //-------------------------------------------------------------------------
 
 function draw() {
+  //debugger;
   game.update();
   game.show();
 }
@@ -131,7 +115,6 @@ function keyPressed() {
   if(!menu) {
     if(keyCode == ENTER) paused = !paused;
     if(keyCode == KEY.W && !paused) {
-      debugger;
       balls.forEach(function(b){
         if(!b.moving) b.launch();
       });
@@ -158,6 +141,7 @@ function Game() {
     bricks       = [],
     powerUps     = [],
     lasers       = [],
+    highScore    = 25000,
     score        = 0,
     lives        = 3,
     level        = 1,
@@ -183,9 +167,9 @@ function Game() {
             if(lives > 0) {
               S_Destroy.play();
               balls.push(new Ball());
-              paddle = new Paddle();
               this.showMessage("\n\n\nPLAYER READY", 90, "f");
             } else {
+              //debugger;
               game.gameOver();
             }
           }
@@ -221,6 +205,7 @@ function Game() {
         }
       } // lasers
 
+
       if(!menu) if(this.isBricksEmpty()) this.nextLevel();
       }
       frameCounter++;
@@ -248,8 +233,8 @@ function Game() {
 
   this.loadLevel = function(l) {
     this.clearBricks();
-    for(var y = 0; y < rows - 8; y++) {
-      for(var x = 0; x < cols; x++) {
+    for(var y = 0; y < ROWS - 8; y++) {
+      for(var x = 0; x < COLS; x++) {
         if(l[y][x] !== 0) {
           bricks.push(new Brick(x, y, l[y][x]));
         }
@@ -264,14 +249,14 @@ function Game() {
   this.updateScore = function(b) {
     var s = 0;
     switch(b.type) {
-      case 2: s = 50 * level; break;
-      case 3: s = 60;         break;
-      case 4: s = 70;         break;
-      case 5: s = 80;         break;
-      case 6: s = 90;         break;
-      case 7: s = 100;        break;
-      case 8: s = 110;        break;
-      case 9: s = 120;        break;
+      case 2:  s = 50 * level; break;
+      case 3:  s = 60;         break;
+      case 4:  s = 70;         break;
+      case 5:  s = 80;         break;
+      case 6:  s = 90;         break;
+      case 7:  s = 100;        break;
+      case 8:  s = 110;        break;
+      case 9:  s = 120;        break;
     }
     score += s;
     if(score > highScore) highScore = score;
@@ -326,27 +311,35 @@ function Game() {
   }
 
   this.drawCourt = function() {
-    image(SP_Background, pl, pt, cw, ch);
+    image(SP_Background, PADDING.l, PADDING.t, COURT.w, COURT.h);
   }
 
   this.showGameInfo = function() {
     stroke(188, 25, 0);
-    fill(188, 25, 0);
+    fill(  188, 25, 0);
     textSize(25);
     textFont(F_Retro);
     textAlign(LEFT);
-    text("HIGH" , w - pr + pl, pt + wall + bw      , pr, (ch/2));
-    text("SCORE", w - pr + pl, pt + wall + bw +  25, pr, (ch/2));
-    text("1UP"  , w - pr + pl, pt + wall + bw + 100, pr, (ch/2));
-    text("LIVES", w - pr + pl, pt + wall + bw + 175, pr, (ch/2));
-    text("ROUND", w - pr + pl, pt + wall + bw + 300, pr, (ch/2));
-
+    text("HIGH" , WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h),
+                  PADDING.r, (COURT.h/2));
+    text("SCORE", WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 25,
+                  PADDING.r, (COURT.h/2));
+    text("1UP"  , WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 100,
+                  PADDING.r, (COURT.h/2));
+    text("LIVES", WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 175,
+                  PADDING.r, (COURT.h/2));
+    text("ROUND", WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 300,
+                  PADDING.r, (COURT.h/2));
     stroke(255);
-    fill(255);
-    text(highScore, w - pr + pl, pt + wall + bw +  50,pr, (ch/2));
-    text(score    , w - pr + pl, pt + wall + bw + 125,pr, (ch/2));
-    text(lives    , w - pr + pl, pt + wall + bw + 200,pr, (ch/2));
-    text(level    , w - pr + pl, pt + wall + bw + 325,pr, (ch/2));
+    fill(  255);
+    text(highScore, WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 50,
+                PADDING.r, (COURT.h/2));
+    text(score, WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 125,
+                PADDING.r, (COURT.h/2));
+    text(lives, WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 200,
+                PADDING.r, (COURT.h/2));
+    text(level, WIDTH - PADDING.r + PADDING.l, PADDING.t + WALL.t + (2*BRICK.h) + 325,
+                PADDING.r, (COURT.h/2));
     this.showPaused();
   }
 
@@ -357,7 +350,8 @@ function Game() {
       textSize(25);
       textFont(F_Retro);
       textAlign(LEFT);
-      text("PAUSED", w - pr + pl, pt + wall + bw + 250, pr, (ch/2));
+      text("PAUSED", WIDTH - PADDING.r + PADDING.l,
+           PADDING.t + WALL.t + (2*BRICK.h) + 250, PADDING.r, (COURT.h/2));
     }
   }
 
@@ -367,38 +361,38 @@ function Game() {
     textSize(35);
     textFont(F_Retro);
     textAlign(CENTER);
-    text("ARKANOID"   , pl + wall, pt + wall + bw     , cw - bw, (ch/2));
+    text("ARKANOID", PADDING.l+WALL.l, PADDING.t+WALL.t+(2*BRICK.h), COURT.w-WALL.l-WALL.r, (COURT.h/2));
 
     textSize(18);
-    text("by aruvham" , pl + wall, pt + wall + bw + 25, cw - bw, (ch/2));
+    text("by aruvham", PADDING.l+WALL.l, PADDING.t+WALL.t+(2*BRICK.h)+25, COURT.w-WALL.l-WALL.r, (COURT.h/2));
 
     textAlign(LEFT);
-    text("POWERUPS : ", pl + (2*bh), h - (14*bh));
-    image(SP_Power_01 , pl + (2*bh), h - (13*bh), bw, bh);
-    text("EXTRA LIFE" , pl + (5*bh), h - (12*bh));
-    image(SP_Power_02 , pl + (2*bh), h - (11*bh), bw, bh);
-    text("TRIPLE"     , pl + (5*bh), h - (10*bh));
-    image(SP_Power_03 , pl + (2*bh), h - (9*bh), bw, bh);
-    text("EXPAND"     , pl + (5*bh), h - (8*bh));
-    image(SP_Power_04 , pl + (2*bh), h - (7*bh), bw, bh);
-    text("MAGNET"     , pl + (5*bh), h - (6*bh));
-    image(SP_Power_05 , pl + (2*bh), h - (5*bh), bw, bh);
-    text("LASER"      , pl + (5*bh), h - (4*bh));
-    image(SP_Power_06 , pl + (2*bh), h - (3*bh), bw, bh);
-    text("BALL SHOWER", pl + (5*bh), h - bw);
+    text("POWERUPS : ", PADDING.l+WALL.l+WALL.l, HEIGHT-(14*BRICK.h));
+    image(SP_Power_01, PADDING.l+WALL.l+WALL.l, HEIGHT-(13*BRICK.h), BRICK.w, BRICK.h);
+    text("EXTRA LIFE", PADDING.l+WALL.l+WALL.l+WALL.l+BRICK.w, HEIGHT-(12*BRICK.h));
+    image(SP_Power_02, PADDING.l+WALL.l+WALL.l, HEIGHT-(11*BRICK.h), BRICK.w, BRICK.h);
+    text("TRIPLE", PADDING.l+WALL.l+WALL.l+WALL.l+BRICK.w, HEIGHT-(10*BRICK.h));
+    image(SP_Power_03, PADDING.l+WALL.l+WALL.l, HEIGHT-(9*BRICK.h), BRICK.w, BRICK.h);
+    text("EXPAND", PADDING.l+WALL.l+WALL.l+WALL.l+BRICK.w, HEIGHT-(8*BRICK.h));
+    image(SP_Power_04, PADDING.l+WALL.l+WALL.l, HEIGHT-(7*BRICK.h), BRICK.w, BRICK.h);
+    text("MAGNET", PADDING.l+WALL.l+WALL.l+WALL.l+BRICK.w, HEIGHT-(6*BRICK.h));
+    image(SP_Power_05, PADDING.l+WALL.l+WALL.l, HEIGHT-(5*BRICK.h), BRICK.w, BRICK.h);
+    text("LASER", PADDING.l+WALL.l+WALL.l+WALL.l+BRICK.w, HEIGHT-(4*BRICK.h));
+    image(SP_Power_06, PADDING.l+WALL.l+WALL.l, HEIGHT-(3*BRICK.h), BRICK.w, BRICK.h);
+    text("BALL SHOWER", PADDING.l+WALL.l+WALL.l+WALL.l+BRICK.w, HEIGHT-(2*BRICK.h));
 
-    text("CONTROLS : ", pl+wall+(cw/2), h-(14*bh));
-    text("MOVE : 'A', 'D'", pl+wall+(cw/2), h-(12*bh));
-    text("LAUNCH BALL : 'W'", pl+wall+(cw/2), h-(10*bh));
-    text("SHOOT LASER : 'S'", pl+wall+(cw/2), h-(8*bh));
-    text("PAUSE : 'ENTER'", pl+wall+(cw/2), h-(6*bh));
-    text("QUIT : 'Q'", pl+wall+(cw/2), h-(4*bh));
-    text("CHOOSE ROUND : 'R'", pl+wall+(cw/2), h-bw);
+    text("CONTROLS : ", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(14*BRICK.h));
+    text("MOVE : 'A', 'D'", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(12*BRICK.h));
+    text("LAUNCH BALL : 'W'", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(10*BRICK.h));
+    text("SHOOT LASER : 'S'", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(8*BRICK.h));
+    text("PAUSE : 'ENTER'", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(6*BRICK.h));
+    text("QUIT : 'Q'", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(4*BRICK.h));
+    text("CHOOSE ROUND : 'R'", PADDING.l+WALL.l+(COURT.w/2), HEIGHT-(2*BRICK.h));
 
     stroke(188, 25, 0);
     fill(188, 25, 0);
     textAlign(CENTER);
-    text("PRESS 'ENTER' TO START GAME", pl+wall, pt+wall+bw+100, cw-wall-wall, (ch/2));
+    text("PRESS 'ENTER' TO START GAME", PADDING.l+WALL.l, PADDING.t+WALL.t+(2*BRICK.h)+100, COURT.w-WALL.l-WALL.r, (COURT.h/2));
   }
 
   this.showMessage = function(str, time, flag) {
@@ -417,7 +411,7 @@ function Game() {
     textSize(25);
     textFont(F_Retro);
     textAlign(CENTER);
-    text(str, pl, pt+wall+bw+100, cw, (ch/2));
+    text(str, PADDING.l, PADDING.t+WALL.t+(2*BRICK.h)+100, COURT.w, (COURT.h/2));
   }
 
   this.gameOver = function() {
@@ -431,9 +425,9 @@ function Game() {
 //-------------------------------------------------------------------------
 
 function Paddle() {
-  this.w = pw;
-  this.x = pl + (cw/2) - (this.w/2);
-  this.y = h - (3*bh);
+  this.w = PADDLE.w;
+  this.x = PADDING.l + (COURT.w/2) - (this.w/2);
+  this.y = HEIGHT - (3*BRICK.h);
 
   // states
   this.expanded   = false;
@@ -454,7 +448,7 @@ function Paddle() {
       this.shoot();
     }*/
 
-    this.x = constrain(this.x, pl + wall, w - pr - wall - this.w);
+    this.x = constrain(this.x, PADDING.l + WALL.l, WIDTH - PADDING.r - WALL.r - this.w);
 
     // reset cooldown
     if(this.onCooldown) {
@@ -463,9 +457,9 @@ function Paddle() {
   } // update
 
   this.show = function() {
-         if(this.expanded) image(SP_Paddle_02, this.x, this.y, this.w, ph);
-    else if(this.laser)    image(SP_Paddle_03, this.x, this.y, this.w, ph);
-    else                   image(SP_Paddle_01, this.x, this.y, this.w, ph);
+         if(this.expanded) image(SP_Paddle_02, this.x, this.y, this.w, PADDLE.h);
+    else if(this.laser)    image(SP_Paddle_03, this.x, this.y, this.w, PADDLE.h);
+    else                   image(SP_Paddle_01, this.x, this.y, this.w, PADDLE.h);
   }
 
   this.expand = function() {
@@ -487,8 +481,8 @@ function Paddle() {
     if(this.laser && !this.onCooldown) {
       this.frame = frameCounter;
       S_Laser.play();
-      lasers.push(new Laser(this.x + (  pw/4), this.y)); // left  laser
-      lasers.push(new Laser(this.x + (3*pw/4), this.y)); // right laser
+      lasers.push(new Laser(this.x + (  PADDLE.w/4), this.y)); // left  laser
+      lasers.push(new Laser(this.x + (3*PADDLE.w/4), this.y)); // right laser
       this.onCooldown = true;
     }
   }
@@ -499,8 +493,8 @@ function Paddle() {
 //-------------------------------------------------------------------------
 
 function Ball(x, y, dx, dy) {
-  this.x = pl + (cw/2);
-  this.y = h - (3*bh) - br;
+  this.x = PADDING.l + (COURT.w/2);
+  this.y = HEIGHT - (3*BRICK.h) - BR;
   this.dx =  3;
   this.dy = -3;
 
@@ -520,15 +514,15 @@ function Ball(x, y, dx, dy) {
   this.update = function() {
     if(this.moving) {
       //edge collision
-      if(this.x < pl + wall + br ||
-         this.x > w - pr - wall - br) this.dx *= -1;
-      if(this.y < pt + wall + br)       this.dy *= -1;
+      if(this.x < PADDING.l + WALL.l + BR ||
+         this.x > WIDTH - PADDING.r - WALL.r - BR) this.dx *= -1;
+      if(this.y < PADDING.t + WALL.t + BR)       this.dy *= -1;
 
       // paddle collision
       if(this.dy > 0) {
-        var point = ballInterceptPaddle(this);
-        if(point) {
-          this.hitPaddle(point);
+        var pt = ballInterceptPaddle(this);
+        if(pt) {
+          this.hitPaddle(pt);
           if(this.magnet) {
             S_Hit_04.play();
             this.moving = false;
@@ -541,9 +535,9 @@ function Ball(x, y, dx, dy) {
 
       // brick collision
       for(var i = bricks.length - 1; i > -1; i--) {
-        var point = ballInterceptBrick(this, bricks[i]);
-        if(point) {
-          this.hitBrick(point);
+        var pt = ballInterceptBrick(this, bricks[i]);
+        if(pt) {
+          this.hitBrick(pt);
           bricks[i].hp--;
           if(bricks[i].hp == 0) {
             game.updateScore(bricks[i]);
@@ -563,59 +557,59 @@ function Ball(x, y, dx, dy) {
       this.x += this.dx;
       this.y += this.dy;
 
-      this.x = constrain(this.x, pl + wall + br - 1,
-                                 w - pr - wall - br + 1);
-      this.y = constrain(this.y, pt + wall + br - 1,
-                                 h + (2*br));
+      this.x = constrain(this.x, PADDING.l + WALL.l + BR - 1,
+                                 WIDTH - PADDING.r - WALL.r - BR + 1);
+      this.y = constrain(this.y, PADDING.t + WALL.t + BR - 1,
+                                 HEIGHT + (2*BR));
 
     } else {
       if(this.magnet) {
         this.x = paddle.x + this.offset;
-        this.y = h - (3*bh) - br;
+        this.y = HEIGHT - (3*BRICK.h) - BR;
       }
-      else            this.x = paddle.x + (pw/2);
+      else            this.x = paddle.x + (PADDLE.w/2);
     }
   } // update
 
   this.show = function() {
-    image(SP_Ball, this.x - br, this.y - br, 2*br, 2*br);
+    image(SP_Ball, this.x - BR, this.y - BR, 2*BR, 2*BR);
   }
 
-  this.hitPaddle = function(point) {
-    switch(point.d) {
+  this.hitPaddle = function(pt) {
+    switch(pt.d) {
       case "TOP":
-        this.y = point.y;
+        this.y = pt.y;
         this.dy *= -1;
         break;
       case "TOP_RIGHT":
       case "TOP_LEFT":
-        this.x = point.x;
+        this.x = pt.x;
         this.dx *= -1;
-        this.y = point.y;
+        this.y = pt.y;
         this.dy *= -1;
         break;
       case "RIGHT":
       case "LEFT":
-        this.x = point.x;
+        this.x = pt.x;
         this.dx *= -1;
         break;
     }
 
     // spin
-    if(KEYIsDown(KEY.A)) this.dx = this.dx * (this.dx > 0 ? 0.6 : 1.05);
-    if(KEYIsDown(KEY.D)) this.dx = this.dx * (this.dx < 0 ? 0.6 : 1.05);
+    if(keyIsDown(KEY.A)) this.dx = this.dx * (this.dx > 0 ? 0.6 : 1.05);
+    if(keyIsDown(KEY.D)) this.dx = this.dx * (this.dx < 0 ? 0.6 : 1.05);
   }
 
-  this.hitBrick = function(point) {
-    switch(point.d) {
+  this.hitBrick = function(pt) {
+    switch(pt.d) {
       case "TOP":
       case "BOTTOM":
-        this.y  = point.y;
+        this.y  = pt.y;
         this.dy = -this.dy;
         break;
       case "RIGHT":
       case "LEFT":
-        this.x  = point.x;
+        this.x  = pt.x;
         this.dx = -this.dx;
         break;
     }
@@ -636,7 +630,7 @@ function Ball(x, y, dx, dy) {
     }
   }
 
-  this.destroyed = function() { return this.y > (h+br) ? true : false; }
+  this.destroyed = function() { return this.y > (HEIGHT+BR) ? true : false; }
 
   this.magnetize =   function() { this.magnet = true; }
 
@@ -668,8 +662,8 @@ function Ball(x, y, dx, dy) {
 //-------------------------------------------------------------------------
 
 function Brick(x, y, type) {
-  this.x = pl + wall + (x*bw);
-  this.y = pt + wall + (y*bh);
+  this.x = PADDING.l + WALL.l + (x*BRICK.w);
+  this.y = PADDING.t + WALL.t + (y*BRICK.h);
   this.type = type;
 
        if(this.type == 1) this.hp = Infinity;  // gold bricks
@@ -678,15 +672,15 @@ function Brick(x, y, type) {
 
   this.show = function() {
     switch(this.type) {
-      case 1:  image(SP_Brick_01, this.x, this.y, bw, bh); break;
-      case 2:  image(SP_Brick_02, this.x, this.y, bw, bh); break;
-      case 3:  image(SP_Brick_03, this.x, this.y, bw, bh); break;
-      case 4:  image(SP_Brick_04, this.x, this.y, bw, bh); break;
-      case 5:  image(SP_Brick_05, this.x, this.y, bw, bh); break;
-      case 6:  image(SP_Brick_06, this.x, this.y, bw, bh); break;
-      case 7:  image(SP_Brick_07, this.x, this.y, bw, bh); break;
-      case 8:  image(SP_Brick_08, this.x, this.y, bw, bh); break;
-      case 9:  image(SP_Brick_09, this.x, this.y, bw, bh); break;
+      case 1:  image(SP_Brick_01, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 2:  image(SP_Brick_02, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 3:  image(SP_Brick_03, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 4:  image(SP_Brick_04, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 5:  image(SP_Brick_05, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 6:  image(SP_Brick_06, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 7:  image(SP_Brick_07, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 8:  image(SP_Brick_08, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 9:  image(SP_Brick_09, this.x, this.y, BRICK.w, BRICK.h); break;
     }
   }
 } // Brick
@@ -723,19 +717,19 @@ function PowerUp(x, y) {
 
   this.show = function() {
     switch(this.type) {
-      case 1: image(SP_Power_01, this.x, this.y, bw, bh); break;
-      case 2: image(SP_Power_02, this.x, this.y, bw, bh); break;
-      case 3: image(SP_Power_03, this.x, this.y, bw, bh); break;
-      case 4: image(SP_Power_04, this.x, this.y, bw, bh); break;
-      case 5: image(SP_Power_05, this.x, this.y, bw, bh); break;
-      case 6: image(SP_Power_06, this.x, this.y, bw, bh); break;
+      case 1: image(SP_Power_01, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 2: image(SP_Power_02, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 3: image(SP_Power_03, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 4: image(SP_Power_04, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 5: image(SP_Power_05, this.x, this.y, BRICK.w, BRICK.h); break;
+      case 6: image(SP_Power_06, this.x, this.y, BRICK.w, BRICK.h); break;
     }
   }
 
   this.hitPaddle = function() {
-    if(this.y + bh > paddle.y &&
-       this.y      < paddle.y + ph &&
-       this.x      > paddle.x - bw &&
+    if(this.y + BRICK.h > paddle.y &&
+       this.y      < paddle.y + PADDLE.h &&
+       this.x      > paddle.x - BRICK.w &&
        this.x      < paddle.x + paddle.w) {
 
       switch(this.type) {
@@ -777,8 +771,8 @@ function Laser(x, y) {
   }
 
   this.hitBrick = function(b) {
-    if(this.y < b.y + bh &&
-      this.x < b.x + bw &&
+    if(this.y < b.y + BRICK.h &&
+      this.x < b.x + BRICK.w &&
       this.x + 5 > b.x) {
       return true;
     }
@@ -786,7 +780,7 @@ function Laser(x, y) {
   }
 
   this.destroyed = function() {
-    return (this.y < pt + wall) ? true : false;
+    return (this.y < PADDING.t + WALL.t) ? true : false;
   }
 } // Laser
 
@@ -813,69 +807,69 @@ function intercept(ax, ay, bx, by, cx, cy, dx, dy, label) {
 }
 
 function ballInterceptPaddle(ball) {
-  var point;
-  point = intercept(ball.x, ball.y,
+  var pt;
+  pt = intercept(ball.x, ball.y,
                  ball.x + ball.dx, ball.y + ball.dy,
-                 paddle.x, paddle.y - br,
-                 paddle.x + paddle.w, paddle.y - br, "TOP");
-  if(!point && ball.dx < 0) {
-    point = intercept(ball.x, ball.y,
+                 paddle.x, paddle.y - BR,
+                 paddle.x + paddle.w, paddle.y - BR, "TOP");
+  if(!pt && ball.dx < 0) {
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   paddle.x + paddle.w, paddle.y - br,
-                   paddle.x + paddle.w + br, paddle.y, "TOP_RIGHT");
+                   paddle.x + paddle.w, paddle.y - BR,
+                   paddle.x + paddle.w + BR, paddle.y, "TOP_RIGHT");
   }
-  if(!point && ball.dx < 0) {
-    point = intercept(ball.x, ball.y,
+  if(!pt && ball.dx < 0) {
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   paddle.x + paddle.w + br, paddle.y,
-                   paddle.x + paddle.w + br, paddle.y + ph, "RIGHT");
+                   paddle.x + paddle.w + BR, paddle.y,
+                   paddle.x + paddle.w + BR, paddle.y + PADDLE.h, "RIGHT");
   }
-  if(!point && ball.dx > 0) {
-    point = intercept(ball.x, ball.y,
+  if(!pt && ball.dx > 0) {
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   paddle.x, paddle.y - br,
-                   paddle.x - br, paddle.y, "TOP_LEFT");
+                   paddle.x, paddle.y - BR,
+                   paddle.x - BR, paddle.y, "TOP_LEFT");
   }
-  if(!point && ball.dx > 0) {
-    point = intercept(ball.x, ball.y,
+  if(!pt && ball.dx > 0) {
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   paddle.x - br, paddle.y,
-                   paddle.x - br, paddle.y + ph, "LEFT");
+                   paddle.x - BR, paddle.y,
+                   paddle.x - BR, paddle.y + PADDLE.h, "LEFT");
   }
-  if(!point) {   // second hitbox
-    point = intercept(ball.x, ball.y,
+  if(!pt) {   // second hitbox
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   paddle.x, paddle.y + (ph/2) - br,
-                   paddle.x + paddle.w, paddle.y + (ph/2) - br, "TOP");
+                   paddle.x, paddle.y + (PADDLE.h/2) - BR,
+                   paddle.x + paddle.w, paddle.y + (PADDLE.h/2) - BR, "TOP");
   }
-  return point;
+  return pt;
 }
 
 function ballInterceptBrick(ball, b) {
-  var point;
+  var pt;
   if(ball.dx < 0) {
-    point = interces(ball.x, ball.y,
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   b.x + bw + br, b.y - br,
-                   b.x + bw + br, b.y + bh + br, "RIGHT");
+                   b.x + BRICK.w + BR, b.y - BR,
+                   b.x + BRICK.w + BR, b.y + BRICK.h + BR, "RIGHT");
   }
-  if (!point && ball.dx > 0) {
-    point = intercept(ball.x, ball.y,
+  if (!pt && ball.dx > 0) {
+    pt = intercept(ball.x, ball.y,
                    ball.x + ball.dx, ball.y + ball.dy,
-                   b.x - br, b.y - br,
-                   b.x - br, b.y + bh + br, "LEFT");
+                   b.x - BR, b.y - BR,
+                   b.x - BR, b.y + BRICK.h + BR, "LEFT");
   }
-  if(!point && ball.dy < 0) {
-      point = intercept(ball.x, ball.y,
+  if(!pt && ball.dy < 0) {
+      pt = intercept(ball.x, ball.y,
                      ball.x + ball.dx, ball.y + ball.dy,
-                     b.x - br, b.y + bh + br,
-                     b.x + bw + br, b.y + bh + br, "BOTTOM");
+                     b.x - BR, b.y + BRICK.h + BR,
+                     b.x + BRICK.w + BR, b.y + BRICK.h + BR, "BOTTOM");
   }
-  if(!point && ball.dy > 0) {
-      point = intercept(ball.x, ball.y,
+  if(!pt && ball.dy > 0) {
+      pt = intercept(ball.x, ball.y,
                      ball.x + ball.dx, ball.y + ball.dy,
-                     b.x - br, b.y - br,
-                     b.x + bw + br, b.y - br, "TOP");
+                     b.x - BR, b.y - BR,
+                     b.x + BRICK.w + BR, b.y - BR, "TOP");
   }
   return pt;
 }
