@@ -4,8 +4,7 @@
 //-------------------------------------------------------------------------
 // game constants
 //-------------------------------------------------------------------------
-                   // pt => hit
-var WIDTH   = 546, //w h pt pr pl wt wr wl cw ch pw ph bw bh br cols rows
+var WIDTH   = 546,
     HEIGHT  = 434,
     PADDING = { t:  14, r: 168, l: 42 },
     WALL    = { t:  14, r:  14, l: 14 },
@@ -40,7 +39,6 @@ var game,
 var menu,
     paused,
     stopped;
-    //AI = true;
 
 //-------------------------------------------------------------------------
 // preload
@@ -102,7 +100,6 @@ function setup() {
 //-------------------------------------------------------------------------
 
 function draw() {
-  //debugger;
   game.update();
   game.show();
 }
@@ -441,12 +438,6 @@ function Paddle() {
     // move
     if(keyIsDown(KEY.A)) this.x -= 6;
     if(keyIsDown(KEY.D)) this.x += 6;
-    /*
-    if(AI && balls[0].moving) {
-      this.x = balls[0].x - (this.w/2);
-      balls.forEach(function(b){ b.launch(); });
-      this.shoot();
-    }*/
 
     this.x = constrain(this.x, PADDING.l + WALL.l, WIDTH - PADDING.r - WALL.r - this.w);
 
