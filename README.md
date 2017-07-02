@@ -1,6 +1,6 @@
-# d3-mini-game
+# javascript-arkanoid
 
-**d3-mini-game** is rendition of the classic NES game [Arkanoid]. Built using [p5.js] to render all the graphics and [p5.sound] for the sound effects.
+**javascript-arkanoid** is rendition of the classic NES game [Arkanoid]. Built using [p5.js] to render all the graphics and [p5.sound] for the sound effects.
 
 * [Play the game now]
 
@@ -12,7 +12,7 @@ Features
 ------
 
 * sprites and sound effects from the original game
-* 10 different levels to chose from
+* 10 different levels to choose from
 
 * 6 power-ups to enhance gameplay:
   * **Extra Life:** Increase your life count by one
@@ -34,14 +34,15 @@ Features
 Future
 ------
 
-* [ ] leaderboard
-* add more levels
-* add background music
+* [ ] leaderboards
+* [ ] add more levels
+* [ ] add background music
 
 <!---
 Link References
 -->
 
 [Arkanoid]:https://en.wikipedia.org/wiki/Arkanoid
+[Play the game now]:https://arkanoid-aruvham.herokuapp.com/
 [p5.js]:https://p5js.org/
 [p5.sound]:https://p5js.org/reference/#/libraries/p5.sound
