@@ -11,20 +11,20 @@
 Features
 ------
 
-* sprites and sound effects from the original game
+* Sprites and sound effects from the original game
 * 10 different levels to choose from
 
 * 6 power-ups to enhance gameplay:
-  * **Extra Life:** Increase your life count by one
-  * **Triple:** Add two extra balls to the screen
-  * **Expand:** Makes your ship bigger for easier gameplay
+  * **Extra Life:** Increases your lives count by one
+  * **Triple:** Adds two extra balls to the screen
+  * **Expand:** Makes your ship longer for easier gameplay
   * **Magnet:** Makes your ship magnetic, balls won't bounce from your ship anymore
   * **Laser:** Gives your ship the ability to shoot lasers, destroying blocks in their way
   * **Ball Shower:** Embrace the chaos!
 
 * 3 types of blocks:
-  * **Color Blocks:** take one hit
-  * **Silver Blocks:** take two
+  * **Color Blocks:** take one hit to destroy
+  * **Silver Blocks:** take two to destroy
   * **Golden Blocks:** can never be destroyed, can you find a way around them?
 
 <h3 align="center">
