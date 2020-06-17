@@ -31,13 +31,6 @@ Features
   <img src="https://dl.dropboxusercontent.com/s/ggf6b7kh6sg06nt/arkanoid_02.png?dl=0" alt="d3-mini-game gameplay screenshot" />
 </h3>
 
-Future
-------
-
-* [ ] leaderboards
-* [ ] add more levels
-* [ ] add background music
-
 <!---
 Link References
 -->
